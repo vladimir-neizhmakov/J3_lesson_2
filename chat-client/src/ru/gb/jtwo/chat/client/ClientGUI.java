@@ -10,12 +10,13 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+
 
 public class ClientGUI extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
 
@@ -68,6 +69,7 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         log.setLineWrap(true);
         log.setWrapStyleWord(true);
         log.setEditable(false);
+        log.append(readLogFromFile(100)); //Показать последние 100 строк лога
         cbAlwaysOnTop.addActionListener(this);
         tfMessage.addActionListener(this);
         btnSend.addActionListener(this);
@@ -130,14 +132,13 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
             } else socketThread.sendMessage(Library.getTypeBcastClient(msg));
         } else socketThread.sendMessage(Library.getTypeBcastClient(msg));
 
-
         //putLog(String.format("%s: %s", username, msg));
         //wrtMsgToLogFile(msg, username);
     }
 
-    private void wrtMsgToLogFile(String msg, String username) {
+    private void wrtMsgToLogFile(String msg) {
         try (FileWriter out = new FileWriter("log.txt", true)) {
-            out.write(username + ": " + msg + System.lineSeparator());
+            out.write( msg + System.lineSeparator());
             out.flush();
         } catch (IOException e) {
             if (!shownIoErrors) {
@@ -145,6 +146,31 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
                 showException(Thread.currentThread(), e);
             }
         }
+    }
+
+    //Добавил метод возвращения последних n строк файла лога
+    private String readLogFromFile(int lastLineCount){
+        ArrayList<String> templog = new ArrayList<>();
+        String str="";
+        try (BufferedReader reader = new BufferedReader(new FileReader("log.txt"))) {
+            while ((str = reader.readLine()) != null) {templog.add(str);}
+            str="";
+            int logsize = templog.size();
+            if (logsize>lastLineCount){
+                for (int i = lastLineCount; i > 0; i--) {
+                    str += templog.get(logsize-i) + System.lineSeparator();
+                }
+                return str;
+            } else {
+                for (int i = 0; i < logsize; i++) {
+                    str += templog.get(i) + System.lineSeparator();
+                }
+                return str;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return str;
     }
 
     private void putLog(String msg) {
@@ -225,14 +251,19 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
                 break;
             case Library.AUTH_DENIED:
                 putLog(value);
+                wrtMsgToLogFile(value); //Включаем запись типа сообщения в файл
                 break;
             case Library.MSG_FORMAT_ERROR:
                 putLog(value);
+                wrtMsgToLogFile(value); //Включаем запись типа сообщения в файл
                 socketThread.close();
                 break;
             case Library.TYPE_BROADCAST:
-                putLog(DATE_FORMAT.format(Long.parseLong(arr[1])) +
-                        arr[2] + ": " + arr[3]);
+                String msg = DATE_FORMAT.format(Long.parseLong(arr[1])) +
+                        arr[2] + ": " + arr[3];
+                putLog(msg);
+                //Включаем запись типа сообщения в файл
+                wrtMsgToLogFile(msg);
                 break;
             case Library.USER_LIST:
                 String users = value.substring(Library.USER_LIST.length() +
