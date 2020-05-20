@@ -123,7 +123,14 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         if ("".equals(msg)) return;
         tfMessage.setText(null);
         tfMessage.requestFocusInWindow();
-        socketThread.sendMessage(Library.getTypeBcastClient(msg));
+        //Добавляю функцию разбора служебных сообщений
+        if (msg.length() > 4){
+            if (msg.substring(0, 4).equals(Library.SYSMSG)) {
+                socketThread.sendMessage(Library.getClientSysMsg(msg.substring(4,msg.length())));
+            } else socketThread.sendMessage(Library.getTypeBcastClient(msg));
+        } else socketThread.sendMessage(Library.getTypeBcastClient(msg));
+
+
         //putLog(String.format("%s: %s", username, msg));
         //wrtMsgToLogFile(msg, username);
     }

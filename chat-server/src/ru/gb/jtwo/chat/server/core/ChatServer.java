@@ -127,6 +127,22 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
                 sendToAllAuthorizedClients(Library.getTypeBroadcast(
                         client.getNickname(), arr[1]));
                 break;
+            //добавил разбор системного сообщения
+            case Library.TYPE_SYSMSG:
+                String[] sysarr = arr[1].split(":");
+                String SysMsgType = sysarr[0];
+                switch (SysMsgType){
+                    case Library.SYSMSG_CHANGE_NICKNAME:
+                        SqlClient.ChangeNickname(client, client.getNickname(),sysarr[1]);
+                        sendToAllAuthorizedClients(Library.getTypeBroadcast(
+                                client.getNickname(), "Я сменил никнэйм на " + sysarr[1]));
+                        break;
+                    default:
+                        client.sendMessage(Library.getMsgFormatError(msg));
+
+                }
+
+                break;
             default:
                 client.sendMessage(Library.getMsgFormatError(msg));
         }

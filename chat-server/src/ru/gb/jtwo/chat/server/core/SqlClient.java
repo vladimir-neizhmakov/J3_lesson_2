@@ -28,6 +28,16 @@ public class SqlClient {
         }
         return null;
     }
+    //Добавил функцию смены никнэйма
+    synchronized static void ChangeNickname(ClientThread client, String old_nickname, String new_nickname) {
+        String query = String.format("update users set nickname = '%s' where nickname = '%s'", new_nickname, old_nickname);
+        try {
+            statement.executeQuery(query);
+            client.reconnect();
+        } catch (SQLException e) {
+            //throw new RuntimeException(e);
+        }
+    }
 
     synchronized static void disconnect() {
         try {
