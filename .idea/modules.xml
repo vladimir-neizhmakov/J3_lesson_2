@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/HW6/HW6.iml" filepath="$PROJECT_DIR$/HW6/HW6.iml" />
       <module fileurl="file://$PROJECT_DIR$/J2_Stream200402.iml" filepath="$PROJECT_DIR$/J2_Stream200402.iml" />
       <module fileurl="file://$PROJECT_DIR$/chat-client/chat-client.iml" filepath="$PROJECT_DIR$/chat-client/chat-client.iml" />
       <module fileurl="file://$PROJECT_DIR$/chat-library/chat-library.iml" filepath="$PROJECT_DIR$/chat-library/chat-library.iml" />
